@@ -10,7 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # セキュリティ設定
 SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')]
+
 
 # アプリ定義などはそのままでOK
 
