@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
-
-# .env を読み込む（ローカル用、Renderでは無視されてもOK）
 from dotenv import load_dotenv
+import dj_database_url
+
+# .env ファイルの読み込み（ローカル開発用）
 load_dotenv()
 
+# ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # セキュリティ設定
@@ -12,15 +14,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')]
 
-
-# アプリ定義などはそのままでOK
-
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Application definition
-
+# アプリ定義
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -28,9 +22,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'projects',
+    'projects',  # あなたのアプリ
 ]
 
+# ミドルウェア
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -41,8 +36,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# URL設定
 ROOT_URLCONF = 'ses_site.urls'
 
+# テンプレート設定
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -58,27 +55,33 @@ TEMPLATES = [
     },
 ]
 
+# WSGIアプリケーション
 WSGI_APPLICATION = 'ses_site.wsgi.application'
 
+# =========================
+# ✅ データベース設定
+# =========================
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT'),
+if DATABASE_URL:
+    # Renderなど本番環境（PostgreSQL）
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    # ローカル開発用（PostgreSQL or SQLite）
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'local_db'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# パスワードバリデーション
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -94,25 +97,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# 国際化
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# Staticファイル設定
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# 自動主キー設定
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
