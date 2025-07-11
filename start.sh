@@ -10,7 +10,8 @@ python manage.py migrate
 
 # スーパーユーザー作成（環境変数で設定された場合のみ）
 echo "Create initial superuser if not exists..."
-python manage.py create_initial_superuser
+python manage.py createinitialsuperuser
+
 
 # 静的ファイルの収集
 echo "Collect static files..."
