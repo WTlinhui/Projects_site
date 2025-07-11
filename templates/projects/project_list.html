@@ -7,7 +7,7 @@
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-  <!-- ✅ Font Awesome（アイコン用） -->
+  <!-- Font Awesome（アイコン用） -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
@@ -55,7 +55,7 @@
   </style>
 </head>
 <body>
-  <!-- ✅ サイドバー -->
+  <!-- サイドバー -->
   <div class="sidebar">
     <div>
       <h5>案件検索</h5>
@@ -85,7 +85,7 @@
       </ul>
     </div>
 
-    <!-- ✅ 管理画面リンク（一番下に表示） -->
+    <!-- 管理画面リンク -->
     <div class="mt-4">
       <a href="{% url 'admin:index' %}" class="text-decoration-none text-muted d-flex align-items-center">
         <i class="fas fa-cog me-2"></i> 管理画面
@@ -95,58 +95,78 @@
 
   <!-- メインコンテンツ -->
   <div class="content">
-    <h2>案件一覧</h2>
+    <form method="post" action="{% url 'export_projects' %}">
+      {% csrf_token %}
 
-    <table class="table table-striped table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>顧客名</th>
-          <th>案件詳細</th>
-          <th>募集状況</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for project in projects %}
-        <tr>
-          <td>{{ project.customer_name }}</td>
-          <td>
-            <div class="project-detail project-detail-preview" id="preview-{{ forloop.counter }}">
-              {{ project.detail|linebreaksbr }}
-            </div>
-            <div class="collapse project-detail" id="detail-{{ forloop.counter }}">
-              {{ project.detail|linebreaksbr }}
-            </div>
-            <button class="btn btn-link p-0 show-more"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#detail-{{ forloop.counter }}"
-              aria-expanded="false"
-              aria-controls="detail-{{ forloop.counter }}"
-              id="toggle-btn-{{ forloop.counter }}"
-              onclick="togglePreview({{ forloop.counter }})">
-              詳細を見る
-            </button>
-          </td>
-          <td>
-            {% if project.status == 'open' %}
-              <span class="badge bg-success">募集中</span>
-            {% else %}
-              <span class="badge bg-secondary">募集終了</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="3" class="text-center">案件がありません</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">案件一覧</h2>
+        <button type="submit" class="btn btn-outline-primary">
+          <i class="fas fa-file-export me-1"></i> 選択した案件をExcel出力
+        </button>
+      </div>
+
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th><input type="checkbox" id="select-all"></th>
+            <th>顧客名</th>
+            <th>案件詳細</th>
+            <th>募集状況</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for project in projects %}
+          <tr>
+            <td>
+              <input type="checkbox" name="selected_ids" value="{{ project.id }}">
+            </td>
+            <td>{{ project.customer_name }}</td>
+            <td>
+              <div class="project-detail project-detail-preview" id="preview-{{ forloop.counter }}">
+                {{ project.detail|linebreaksbr }}
+              </div>
+              <div class="collapse project-detail" id="detail-{{ forloop.counter }}">
+                {{ project.detail|linebreaksbr }}
+              </div>
+              <button class="btn btn-link p-0 show-more"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#detail-{{ forloop.counter }}"
+                aria-expanded="false"
+                aria-controls="detail-{{ forloop.counter }}"
+                id="toggle-btn-{{ forloop.counter }}"
+                onclick="togglePreview({{ forloop.counter }})">
+                詳細を見る
+              </button>
+            </td>
+            <td>
+              {% if project.status == 'open' %}
+                <span class="badge bg-success">募集中</span>
+              {% else %}
+                <span class="badge bg-secondary">募集終了</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center">案件がありません</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </form>
   </div>
 
   <!-- Bootstrap & Script -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // 「全選択」チェックボックスの動作
+    document.getElementById('select-all').addEventListener('change', function () {
+      const checkboxes = document.querySelectorAll('input[name="selected_ids"]');
+      checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // 詳細表示トグル関数
     function togglePreview(index) {
       const preview = document.getElementById(`preview-${index}`);
       const collapse = document.getElementById(`detail-${index}`);
