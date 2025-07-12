@@ -3,16 +3,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
 
-# .env ファイルの読み込み（ローカル開発用）
-load_dotenv()
-
-# ベースディレクトリ
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=Path('/home/linoh/Projects_site/.env'))
 
 # セキュリティ設定
 SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')]
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # アプリ定義
 INSTALLED_APPS = [
