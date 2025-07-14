@@ -9,7 +9,7 @@ load_dotenv(dotenv_path=Path('/home/linoh/Projects_site/.env'))
 # セキュリティ設定
 SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '3.113.36.167']
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # アプリ定義
@@ -34,6 +34,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ses_site.middleware.LoginRequiredMiddleware',
 ]
 
 # URL設定
@@ -104,10 +105,14 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Staticファイル設定
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 # 自動主キー設定
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = '/login/'           # 未ログイン時にリダイレクトされるURL
+LOGIN_REDIRECT_URL = '/'        # ログイン成功後にリダイレクトされるURL（トップページなど）
+LOGOUT_REDIRECT_URL = '/login/' # ログアウト後にリダイレクトされるURL
+
+# 静的ファイル設定（本番用）
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/ubuntu/SES_project/staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

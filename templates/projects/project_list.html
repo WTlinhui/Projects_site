@@ -50,7 +50,6 @@
       font-size: 0.9rem;
     }
 
-    /* 顧客名・募集状況・チェックボックスのレイアウト */
     .card-header-flex {
       display: flex;
       justify-content: space-between;
@@ -68,8 +67,8 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      flex-grow: 1; /* 左側いっぱいに広げる */
-      min-width: 0; /* テキスト切れ対策 */
+      flex-grow: 1;
+      min-width: 0;
     }
 
     .header-right {
@@ -121,12 +120,28 @@
       </ul>
     </div>
 
-    <!-- 管理画面リンク -->
-    <div class="mt-4">
-      <a href="{% url 'admin:index' %}" class="text-decoration-none text-muted d-flex align-items-center">
-        <i class="fas fa-cog me-2"></i> 管理画面
-      </a>
-    </div>
+    <!-- ログインユーザー向けメニュー -->
+{% if user.is_authenticated %}
+<div class="mt-4">
+  <!-- 管理画面リンク -->
+  <a href="{% url 'admin:index' %}" class="text-decoration-none text-muted d-flex align-items-center mb-2">
+    <i class="fas fa-cog me-2"></i> 管理画面
+  </a>
+
+  <!-- ユーザー名表示 -->
+  <p class="text-muted mb-2 d-flex align-items-center">
+    <i class="fas fa-user me-2"></i>{{ user.username }} さん
+  </p>
+
+  <!-- POSTログアウト（確認ダイアログ付き、アンダーバーなし） -->
+  <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('ログアウトしますか？');">
+    {% csrf_token %}
+    <button type="submit" class="btn p-0 text-muted text-decoration-none d-flex align-items-center">
+      <i class="fas fa-sign-out-alt me-2"></i> ログアウト
+    </button>
+  </form>
+</div>
+{% endif %}
   </div>
 
   <!-- メインコンテンツ -->
