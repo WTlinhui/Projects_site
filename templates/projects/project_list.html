@@ -1,238 +1,93 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <title>案件一覧（募集状況をチェックボックスの左に右寄せ）</title>
+{% extends "base.html" %}
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+{% block title %}案件一覧{% endblock %}
 
-  <!-- Font Awesome（アイコン用） -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <style>
-    body {
-      min-height: 100vh;
-      display: flex;
-      margin: 0;
-    }
-
-    .sidebar {
-      width: 220px;
-      background-color: #f8f9fa;
-      padding: 20px;
-      border-right: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-
-    .content {
-      flex-grow: 1;
-      padding: 20px;
-    }
-
-    .project-detail-preview {
-      max-height: 4.5em;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .project-detail {
-      white-space: normal;
-      line-height: 1.6;
-      word-break: break-word;
-    }
-
-    .show-more {
-      margin-top: 5px;
-      font-size: 0.9rem;
-    }
-
-    .card-header-flex {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.75rem;
-      padding: 0;
-      border-bottom: none;
-    }
-
-    .card-title {
-      margin-bottom: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-      word-break: break-word;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex-grow: 1;
-      min-width: 0;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    .badge-status {
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .form-check {
-      margin-bottom: 0;
-      flex-shrink: 0;
-    }
-  </style>
-</head>
-<body>
-  <!-- サイドバー -->
-  <div class="sidebar">
-    <div>
-      <h5>案件検索</h5>
-
-      <form method="get" action="{% url 'project_list' %}">
-        <div class="mb-3">
-          <input
-            type="text"
-            name="keyword"
-            class="form-control"
-            placeholder="キーワード検索"
-            value="{{ request.GET.keyword|default_if_none:'' }}"
-          >
-        </div>
-
-        <div class="mb-3">
-          <button type="submit" class="btn btn-primary w-100">検索</button>
-        </div>
-      </form>
-
-      <hr>
-
-      <ul class="list-unstyled">
-        <li><a href="{% url 'project_list' %}">すべての案件</a></li>
-        <li><a href="{% url 'project_list' %}?status=open">募集中</a></li>
-        <li><a href="{% url 'project_list' %}?status=closed">募集終了</a></li>
-      </ul>
+{% block content %}
+<form method="post" action="{% url 'export_selected_projects_with_gpt' %}">
+  {% csrf_token %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">案件一覧</h2>
+    <div class="d-flex align-items-center">
+      <div class="form-check me-3">
+        <input class="form-check-input" type="checkbox" id="select-all">
+        <label class="form-check-label" for="select-all">全選択</label>
+      </div>
+      <button type="submit" class="btn btn-outline-primary">
+        <i class="fas fa-file-export me-1"></i> 選択した案件をExcel出力
+      </button>
     </div>
-
-    <!-- ログインユーザー向けメニュー -->
-{% if user.is_authenticated %}
-<div class="mt-4">
-  <!-- 管理画面リンク -->
-  <a href="{% url 'admin:index' %}" class="text-decoration-none text-muted d-flex align-items-center mb-2">
-    <i class="fas fa-cog me-2"></i> 管理画面
-  </a>
-
-  <!-- ユーザー名表示 -->
-  <p class="text-muted mb-2 d-flex align-items-center">
-    <i class="fas fa-user me-2"></i>{{ user.username }} さん
-  </p>
-
-  <!-- POSTログアウト（確認ダイアログ付き、アンダーバーなし） -->
-  <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('ログアウトしますか？');">
-    {% csrf_token %}
-    <button type="submit" class="btn p-0 text-muted text-decoration-none d-flex align-items-center">
-      <i class="fas fa-sign-out-alt me-2"></i> ログアウト
-    </button>
-  </form>
-</div>
-{% endif %}
   </div>
 
-  <!-- メインコンテンツ -->
-  <div class="content">
-    <form method="post" action="{% url 'export_selected_projects_with_gpt' %}">
-      {% csrf_token %}
-
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">案件一覧</h2>
-
-        <div class="d-flex align-items-center">
-          <div class="form-check me-3">
-            <input class="form-check-input" type="checkbox" id="select-all">
-            <label class="form-check-label" for="select-all">全選択</label>
-          </div>
-          <button type="submit" class="btn btn-outline-primary">
-            <i class="fas fa-file-export me-1"></i> 選択した案件をExcel出力
-          </button>
-        </div>
-      </div>
-
-      <div class="row">
-        {% for project in projects %}
-          <div class="col-md-4 mb-4">
-            <div class="card h-100 p-3">
-              <div class="card-header-flex">
-                <h5 class="card-title" title="{{ project.customer_name }}">{{ project.customer_name }}</h5>
-                <div class="header-right">
-                  {% if project.status == 'open' %}
-                    <span class="badge bg-success badge-status">募集中</span>
-                  {% else %}
-                    <span class="badge bg-secondary badge-status">募集終了</span>
-                  {% endif %}
-                  <div class="form-check">
-                    <input class="form-check-input project-checkbox" type="checkbox" name="selected_ids" value="{{ project.id }}" id="checkbox-{{ project.id }}">
-                  </div>
-                </div>
-              </div>
-
-              <div class="project-detail project-detail-preview" id="preview-{{ forloop.counter }}">
-                {{ project.detail|linebreaksbr }}
-              </div>
-              <div class="collapse project-detail" id="detail-{{ forloop.counter }}">
-                {{ project.detail|linebreaksbr }}
-              </div>
-              <button class="btn btn-link p-0 show-more"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#detail-{{ forloop.counter }}"
-                aria-expanded="false"
-                aria-controls="detail-{{ forloop.counter }}"
-                id="toggle-btn-{{ forloop.counter }}"
-                onclick="togglePreview({{ forloop.counter }})">
-                詳細を見る
-              </button>
+  <div class="row">
+    {% for project in projects %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0" title="{{ project.customer_name }}">{{ project.customer_name }}</h5>
+          <div class="d-flex align-items-center gap-2">
+            {% if project.status == 'open' %}
+            <span class="badge bg-success">募集中</span>
+            {% else %}
+            <span class="badge bg-secondary">募集終了</span>
+            {% endif %}
+            <div class="form-check">
+              <input class="form-check-input project-checkbox" type="checkbox" name="selected_ids" value="{{ project.id }}" id="checkbox-{{ project.id }}">
             </div>
           </div>
-        {% empty %}
-          <p class="text-center">案件がありません</p>
-        {% endfor %}
+        </div>
+
+        <div class="project-detail-preview" id="preview-{{ forloop.counter }}">
+          {{ project.detail|linebreaksbr }}
+        </div>
+        <div class="collapse project-detail" id="detail-{{ forloop.counter }}">
+          {{ project.detail|linebreaksbr }}
+        </div>
+        <button
+          class="btn btn-link p-0 show-more"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#detail-{{ forloop.counter }}"
+          aria-expanded="false"
+          aria-controls="detail-{{ forloop.counter }}"
+          id="toggle-btn-{{ forloop.counter }}"
+          onclick="togglePreview({{ forloop.counter }})"
+        >
+          詳細を見る
+        </button>
       </div>
-    </form>
+    </div>
+    {% empty %}
+    <p class="text-center">案件がありません</p>
+    {% endfor %}
   </div>
+</form>
+{% endblock %}
 
-  <!-- Bootstrap & Script -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // 「全選択」チェックボックスの動作
-    document.getElementById('select-all').addEventListener('change', function () {
-      const checkboxes = document.querySelectorAll('.project-checkbox');
-      checkboxes.forEach(cb => cb.checked = this.checked);
-    });
+{% block extra_scripts %}
+<script>
+  // 全選択チェックボックスの動作
+  document.getElementById('select-all').addEventListener('change', function () {
+    const checkboxes = document.querySelectorAll('.project-checkbox');
+    checkboxes.forEach(cb => cb.checked = this.checked);
+  });
 
-    // 詳細表示トグル関数
-    function togglePreview(index) {
-      const preview = document.getElementById(`preview-${index}`);
-      const collapse = document.getElementById(`detail-${index}`);
-      const button = document.getElementById(`toggle-btn-${index}`);
+  // 詳細トグル処理
+  function togglePreview(index) {
+    const preview = document.getElementById(`preview-${index}`);
+    const collapse = document.getElementById(`detail-${index}`);
+    const button = document.getElementById(`toggle-btn-${index}`);
 
-      if (!collapse.dataset.listenerAdded) {
-        collapse.addEventListener('shown.bs.collapse', function () {
-          button.textContent = '詳細を閉じる';
-          preview.style.display = 'none';
-        });
-        collapse.addEventListener('hidden.bs.collapse', function () {
-          button.textContent = '詳細を見る';
-          preview.style.display = '';
-        });
-        collapse.dataset.listenerAdded = true;
-      }
+    if (!collapse.dataset.listenerAdded) {
+      collapse.addEventListener('shown.bs.collapse', function () {
+        button.textContent = '詳細を閉じる';
+        preview.style.display = 'none';
+      });
+      collapse.addEventListener('hidden.bs.collapse', function () {
+        button.textContent = '詳細を見る';
+        preview.style.display = '';
+      });
+      collapse.dataset.listenerAdded = true;
     }
-  </script>
-</body>
-</html>
+  }
+</script>
+{% endblock %}

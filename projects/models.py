@@ -8,3 +8,7 @@ class Project(models.Model):
 
     def __str__(self):
         return f"{self.customer_name} | {self.detail[:45]}..."
+
+    class Meta:
+        verbose_name = "案件"
+        verbose_name_plural = "案件"

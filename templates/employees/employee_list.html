@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">社員一覧</h2>
+
+<div class="row">
+  <div class="col-md-6">
+    {% for employee in left_employees %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="#left-detail-{{ forloop.counter }}" class="toggle-btn" data-bs-toggle="collapse" aria-expanded="false" aria-controls="left-detail-{{ forloop.counter }}">
+              {{ employee.name }}
+              <small class="text-muted">（年齢: {{ employee.current_age }}歳、経験年数: {{ employee.experience_years }}年）</small>
+              <span class="float-end toggle-label">▼ 詳細を見る</span>
+            </a>
+          </h5>
+          <div id="left-detail-{{ forloop.counter }}" class="collapse mt-3">
+            <p>{{ employee.introduction|linebreaksbr }}</p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>左側に社員情報がありません。</p>
+    {% endfor %}
+  </div>
+
+  <div class="col-md-6">
+    {% for employee in right_employees %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">
+            <a href="#right-detail-{{ forloop.counter }}" class="toggle-btn" data-bs-toggle="collapse" aria-expanded="false" aria-controls="right-detail-{{ forloop.counter }}">
+              {{ employee.name }}
+              <small class="text-muted">（年齢: {{ employee.current_age }}歳、経験年数: {{ employee.experience_years }}年）</small>
+              <span class="float-end toggle-label">▼ 詳細を見る</span>
+            </a>
+          </h5>
+          <div id="right-detail-{{ forloop.counter }}" class="collapse mt-3">
+            <p>{{ employee.introduction|linebreaksbr }}</p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>右側に社員情報がありません。</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.toggle-btn').forEach(function (btn) {
+    const label = btn.querySelector('.toggle-label');
+    const targetId = btn.getAttribute('href');
+    const target = document.querySelector(targetId);
+
+    if (target) {
+      target.addEventListener('show.bs.collapse', function () {
+        label.textContent = '▲ 閉じる';
+      });
+      target.addEventListener('hide.bs.collapse', function () {
+        label.textContent = '▼ 詳細を見る';
+      });
+    }
+  });
+});
+</script>
+{% endblock %}

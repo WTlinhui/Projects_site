@@ -1,10 +1,6 @@
 services:
   - type: web
-    name: Project_site  # Renderのサービス名に変更してください
+    name: Project_site
     env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-      python manage.py migrate
-      python manage.py createinitialsuperuser
-    startCommand: gunicorn ses_site.wsgi
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./start.sh
