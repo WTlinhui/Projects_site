@@ -1,0 +1,29 @@
+# Python関連
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 仮想環境
+venv/
+ENV/
+env/
+.venv/
+
+# 環境変数ファイル
+.env
+.env.local
+.env.*.local
+
+# Django関連
+*.log
+*.pot
+*.pyc
+db.sqlite3
+media/
+
+# IDEやエディタ関連（例：VSCode）
+.vscode/
+.idea/
+
+.env.production
