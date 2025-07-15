@@ -3,6 +3,9 @@
 {% block content %}
 <h2 class="mb-4">社員一覧</h2>
 
+{% if not left_employees and not right_employees %}
+  <p>社員情報はありません。</p>
+{% else %}
 <div class="row">
   <div class="col-md-6">
     {% for employee in left_employees %}
@@ -20,8 +23,6 @@
           </div>
         </div>
       </div>
-    {% empty %}
-      <p>左側に社員情報がありません。</p>
     {% endfor %}
   </div>
 
@@ -41,11 +42,10 @@
           </div>
         </div>
       </div>
-    {% empty %}
-      <p>右側に社員情報がありません。</p>
     {% endfor %}
   </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}
