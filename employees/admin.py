@@ -11,12 +11,12 @@ class EmployeeAdmin(admin.ModelAdmin):
     def display_recorded_at(self, obj):
         if obj and obj.recorded_at:
             return format_html(
-                '{}<br><small style="color:#555;">作成日から1年経過ごとに年齢と経験年数が自動で+1されます</small>',
+                '{}<br><small style="color:#555;">作成日から1年経過ごとに年齢と経験年数が自動で+1されます。</small>',
                 obj.recorded_at.strftime('%Y-%m-%d')
             )
         else:
             return format_html(
-                '<small style="color:#555;">※ 作成日は保存時に自動入力されます。<br>作成日から1年経過ごとに年齢と経験年数が自動で+1されます</small>'
+                '<small style="color:#555;">※ 作成日は保存時に自動入力されます。<br>作成日から1年経過ごとに年齢と経験年数が自動で+1されます。</small>'
             )
     display_recorded_at.short_description = '作成日'
 
@@ -37,7 +37,7 @@ class EmployeeAdmin(admin.ModelAdmin):
 
     # フォームのフィールド並び順
     def get_fields(self, request, obj=None):
-        fields = ['name', 'introduction', 'base_age', 'base_industry_year']
+        fields = ['name', 'introduction', 'base_age', 'base_experience']
         if obj:  # 編集画面
             fields.append('display_recorded_at')
         else:  # 追加画面

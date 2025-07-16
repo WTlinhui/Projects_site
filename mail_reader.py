@@ -76,17 +76,20 @@ def fetch_emails_and_register_projects(allowed_domains):
 
         # DB登録
         for project_text in projects_texts:
-            # 既に同じ案件詳細が登録済みなら重複登録しない処理も後で追加可能
-            p = Project(
-                customer_name=from_email.split("@")[-1],
-                detail=project_text,
-                status='open',
-            )
-            p.save()
-            print(f"案件登録: {p}")
+            if not Project.objects.filter(detail=project_text).exists():
+                p = Project(
+                    customer_name=from_email.split("@")[-1],
+                    detail=project_text,
+                    status='open',
+                )
+                p.save()
+                print(f"案件登録: {p}")
+            else:
+                print("既に同じ内容の案件が存在します。スキップします。")
+
 
         # 必要なら既読にする
-        # mail.store(i, '+FLAGS', '\\Seen')
+        mail.store(i, '+FLAGS', '\\Seen')
 
     mail.logout()
 

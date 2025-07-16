@@ -5,8 +5,8 @@ class Employee(models.Model):
     name = models.CharField('氏名', max_length=100)
     introduction = models.TextField('紹介文')
 
-    base_age = models.PositiveIntegerField('年齢初期値')
-    base_industry_year = models.PositiveIntegerField('入業年初期値')  # 例：2018
+    base_age = models.PositiveIntegerField('年齢初期値', default=0)
+    base_experience = models.PositiveIntegerField('経験年数初期値', default=0)
 
     recorded_at = models.DateField('作成日', auto_now_add=True)
 
@@ -16,12 +16,15 @@ class Employee(models.Model):
         delta = today.year - self.recorded_at.year
         if (today.month, today.day) < (self.recorded_at.month, self.recorded_at.day):
             delta -= 1
-        return self.base_age + max(delta, 0)
+        return self.base_age + max(0, delta)
 
     @property
     def experience_years(self):
         today = timezone.now().date()
-        return max(today.year - self.base_industry_year, 0)
+        delta = today.year - self.recorded_at.year
+        if (today.month, today.day) < (self.recorded_at.month, self.recorded_at.day):
+            delta -= 1
+        return self.base_experience + max(0, delta)
 
     def short_introduction(self):
         return (self.introduction[:50] + '...') if len(self.introduction) > 50 else self.introduction
