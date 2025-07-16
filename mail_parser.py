@@ -6,22 +6,25 @@ PROJECT_KEYWORDS = [
 ]
 
 def split_projects_from_text(text):
-    # 1. 署名部分（末尾）を除去：行頭の「-----」や「ーーー」などの線で判定
-    signature_split = re.split(r'(?m)^\s*[―-]{3,}\s*$', text.strip())
-    text_without_signature = signature_split[0]  # 最初の部分のみ使う
+    # いろんな線パターンで分割
+    blocks = re.split(r'[-ー_*~]{5,}', text)  # 5回以上の記号連続で分割
 
-    # 2. 案件単位で分割
-    split_pattern = r'\[案件\d+\]|【案件\d+】'
-    raw_projects = re.split(split_pattern, text_without_signature)
-
-    # 3. 有効な案件のみフィルタ（キーワード2個以上含む）
     projects = []
-    for block in raw_projects:
+    for block in blocks:
         block = block.strip()
         if not block:
             continue
-        count = sum(keyword in block for keyword in PROJECT_KEYWORDS)
-        if count >= 3:
-            projects.append(block)
-    
+
+        # 案件番号の区切りも分割
+        sub_blocks = re.split(r'\[案件\d+\]|【案件\d+】', block)
+
+        for sub_block in sub_blocks:
+            sub_block = sub_block.strip()
+            if not sub_block:
+                continue
+
+            count = sum(keyword in sub_block for keyword in PROJECT_KEYWORDS)
+            if count >= 3:
+                projects.append(sub_block)
+
     return projects
