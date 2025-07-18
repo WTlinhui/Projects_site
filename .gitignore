@@ -27,3 +27,4 @@ media/
 .idea/
 
 .env.production
+credentials.json
