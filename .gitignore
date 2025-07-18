@@ -28,3 +28,5 @@ media/
 
 .env.production
 credentials.json
+token.json
+token.json

@@ -587,3 +587,5 @@ django.db.utils.OperationalError: no such table: projects_project
 未読メール数: 0
 未読メール数: 0
 未読メール数: 0
+未読メール数: 1
+未読メール数: 1
