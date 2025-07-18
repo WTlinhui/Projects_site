@@ -7,10 +7,12 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ローカル用環境変数ファイルを読み込む（存在すれば）
-env_path = BASE_DIR / '.env.local'
+env_file = os.environ.get('DJANGO_ENV_FILE', '.env.local')
+env_path = BASE_DIR / env_file
+
 if env_path.exists():
     load_dotenv(dotenv_path=env_path)
-
+    
 # 環境変数取得
 SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
