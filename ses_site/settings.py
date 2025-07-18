@@ -20,6 +20,8 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(','
 
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 # アプリ定義
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -30,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'projects',
     'employees',
+    'gmail_reader',
     # 追加したアプリがあればここに書く
 ]
 

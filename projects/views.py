@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.db import models
-from .models import Project
+from .models import Project, Customer
 import openpyxl
 from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 from openpyxl.utils import get_column_letter
@@ -15,21 +15,31 @@ import json
 client = OpenAI()
 
 def project_list(request):
+    projects = Project.objects.select_related('customer').all()  # customerを一緒に取得する
+
+    # 状態やキーワード絞り込みもあればここに
     status_filter = request.GET.get('status')
     keyword = request.GET.get('keyword')
-
-    projects = Project.objects.all()
-
     if status_filter in ['open', 'closed']:
         projects = projects.filter(status=status_filter)
-
     if keyword:
         projects = projects.filter(
-            models.Q(customer_name__icontains=keyword) |
+            models.Q(customer__name__icontains=keyword) |  # customer.name で検索
             models.Q(detail__icontains=keyword)
         )
 
     context = {'projects': projects}
+    return render(request, 'projects/project_list.html', context)
+
+
+# ▼ 顧客別の案件一覧
+def projects_by_customer(request, customer_id):
+    customer = get_object_or_404(Customer, pk=customer_id)
+    projects = Project.objects.filter(customer=customer)
+    context = {
+        'projects': projects,
+        'customer': customer
+    }
     return render(request, 'projects/project_list.html', context)
 
 # ▼ GPTで案件情報抽出

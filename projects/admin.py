@@ -1,8 +1,9 @@
 from django.contrib import admin
-from .models import Project
+from .models import Project, Customer
 from django.contrib.admin.models import LogEntry
 
 admin.site.register(Project)
+admin.site.register(Customer)
 
 @admin.register(LogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
