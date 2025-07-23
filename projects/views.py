@@ -25,7 +25,8 @@ def project_list(request):
     if keyword:
         projects = projects.filter(
             models.Q(customer__name__icontains=keyword) |  # customer.name で検索
-            models.Q(detail__icontains=keyword)
+            models.Q(detail__icontains=keyword) | 
+            models.Q(customer_person__icontains=keyword)
         )
 
     context = {'projects': projects}
