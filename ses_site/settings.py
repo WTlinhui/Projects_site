@@ -16,8 +16,7 @@ if env_path.exists():
 # 環境変数取得
 SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-
+ALLOWED_HOSTS = ['3.113.36.167', 'localhost', '127.0.0.1', 'wb.wisdom-technology.co.jp']
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
