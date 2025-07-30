@@ -8,15 +8,17 @@ from googleapiclient.discovery import build
 from .models import GmailToken
 from .utils import process_emails, get_credentials_for_user, authenticate_gmail_api
 from django.utils.timezone import make_aware
+import logging
+logger = logging.getLogger(__name__)
 
 
 
 @login_required
 def authorize(request):
     flow = Flow.from_client_secrets_file(
-        os.path.join(settings.BASE_DIR, 'credentials.json'),  # ← credentials.json を client_secrets.json に揃える
+        os.path.join(settings.BASE_DIR, 'credentials.json'),
         scopes=['https://www.googleapis.com/auth/gmail.readonly'],
-        redirect_uri=request.build_absolute_uri('/gmail/oauth2callback/')
+        redirect_uri='https://wb.wisdom-technology.co.jp/gmail/oauth2callback/'
     )
     authorization_url, state = flow.authorization_url(
         access_type='offline',
@@ -31,10 +33,10 @@ def authorize(request):
 def oauth2callback(request):
     state = request.session.get('state')
     flow = Flow.from_client_secrets_file(
-        os.path.join(settings.BASE_DIR, 'credentials.json'),  # ← ファイル名注意！
+        os.path.join(settings.BASE_DIR, 'credentials.json'),
         scopes=['https://www.googleapis.com/auth/gmail.readonly'],
         state=state,
-        redirect_uri=request.build_absolute_uri('/gmail/oauth2callback/')
+        redirect_uri='https://wb.wisdom-technology.co.jp/gmail/oauth2callback/'
     )
     flow.fetch_token(authorization_response=request.build_absolute_uri())
     credentials = flow.credentials
