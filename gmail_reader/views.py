@@ -6,30 +6,35 @@ from django.contrib.auth.decorators import login_required
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from .models import GmailToken
-from .utils import process_emails, get_credentials_for_user
+from .utils import process_emails, get_credentials_for_user, authenticate_gmail_api
+from django.utils.timezone import make_aware
+
+
 
 @login_required
 def authorize(request):
     flow = Flow.from_client_secrets_file(
-        os.path.join(settings.BASE_DIR, 'credentials.json'),
+        os.path.join(settings.BASE_DIR, 'credentials.json'),  # ← credentials.json を client_secrets.json に揃える
         scopes=['https://www.googleapis.com/auth/gmail.readonly'],
-        redirect_uri=request.build_absolute_uri('/oauth2callback/')
+        redirect_uri=request.build_absolute_uri('/gmail/oauth2callback/')
     )
     authorization_url, state = flow.authorization_url(
         access_type='offline',
-        include_granted_scopes='true'
+        include_granted_scopes='true',
+        prompt='consent'
     )
     request.session['state'] = state
     return redirect(authorization_url)
+
 
 @login_required
 def oauth2callback(request):
     state = request.session.get('state')
     flow = Flow.from_client_secrets_file(
-        os.path.join(settings.BASE_DIR, 'credentials.json'),
+        os.path.join(settings.BASE_DIR, 'credentials.json'),  # ← ファイル名注意！
         scopes=['https://www.googleapis.com/auth/gmail.readonly'],
         state=state,
-        redirect_uri=request.build_absolute_uri('/oauth2callback/')
+        redirect_uri=request.build_absolute_uri('/gmail/oauth2callback/')
     )
     flow.fetch_token(authorization_response=request.build_absolute_uri())
     credentials = flow.credentials
@@ -43,17 +48,18 @@ def oauth2callback(request):
             'client_id': credentials.client_id,
             'client_secret': credentials.client_secret,
             'scopes': ','.join(credentials.scopes),
-            'expiry': credentials.expiry,
+            'expiry': credentials.expiry if credentials.expiry else None
         }
     )
+    return HttpResponse("✅ 認証が完了しました。Gmailトークンを保存しました。")
 
-    return HttpResponse("認証が完了しました。トークンを保存しました。")
 
 @login_required
 def fetch_emails_view(request):
     creds = get_credentials_for_user(request.user)
     if not creds:
-        return HttpResponse("Gmail認証が必要です。", status=401)
+        return HttpResponse("⚠️ Gmail認証が必要です。", status=401)
+
     service = build('gmail', 'v1', credentials=creds)
     count = process_emails(service, request.user)
-    return HttpResponse(f"{count} 件の未読メールを処理しました。")
+    return HttpResponse(f"📬 {count} 件の未読メールを処理し、案件を抽出しました。")

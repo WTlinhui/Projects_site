@@ -15,7 +15,7 @@ import json
 client = OpenAI()
 
 def project_list(request):
-    projects = Project.objects.select_related('customer').all()  # customerを一緒に取得する
+    projects = Project.objects.select_related('customer').all().order_by('-created_at')  # customerを一緒に取得する
 
     # 状態やキーワード絞り込みもあればここに
     status_filter = request.GET.get('status')

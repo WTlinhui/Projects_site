@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 class Customer(models.Model):
     name = models.CharField(max_length=255, unique=True) 
@@ -15,7 +16,8 @@ class Project(models.Model):
     detail = models.TextField()
     status_choices = [('open', '募集中'), ('closed', '募集終了')]
     status = models.CharField(max_length=10, choices=status_choices)
-    customer_person = models.CharField("顧客担当者名", max_length=100, blank=True, null=True)  # 任意
+    customer_person = models.CharField("顧客担当者名", max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(default=now)  # 任意
 
     def __str__(self):
         return f"{self.customer.name} | {self.detail[:45]}..."
