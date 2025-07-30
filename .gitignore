@@ -31,3 +31,4 @@ credentials.json
 token.json
 token.json
 db.sqlite3
+backups/
