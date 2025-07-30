@@ -17,6 +17,12 @@ if env_path.exists():
 SECRET_KEY = os.environ.get('SECRET_KEY', 'insecure-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = ['3.113.36.167', 'localhost', '127.0.0.1', 'wb.wisdom-technology.co.jp']
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://wb.wisdom-technology.co.jp",
+]
+
+
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -70,12 +76,19 @@ WSGI_APPLICATION = 'ses_site.wsgi.application'
 # =========================
 # データベース設定
 # =========================
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = 'mysql://ses_user:secure_password@mysql-container:3306/ses_project_db'
 
 if DATABASE_URL:
     # DATABASE_URLがある場合はこれを使う（本番環境用）
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600),
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'ses_project_db',
+            'USER': 'ses_user',
+            'PASSWORD': 'secure_password',
+            'HOST': '172.18.0.2',
+            'PORT': '3306',
+        }
     }
 else:
     # ローカル環境用（.env.localのDATABASE_URLが未設定ならSQLite）
@@ -85,6 +98,7 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
 
 # パスワードバリデーション
 AUTH_PASSWORD_VALIDATORS = [

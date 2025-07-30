@@ -30,3 +30,4 @@ media/
 credentials.json
 token.json
 token.json
+db.sqlite3
