@@ -22,21 +22,22 @@
     {% for project in projects %}
     <div class="col-md-4 mb-4">
       <div class="card h-100 p-3">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-<h5 class="mb-0" title="{{ project.customer.name }}">
-  <a href="{% url 'projects:projects_by_customer' project.customer.id %}" class="text-decoration-none text-dark">
-    {{ project.customer.name }}
-  </a>
-  {% if project.customer_person %}
-    （{{ project.customer_person }}）
-  {% endif %}
-</h5>
 
+        <!-- 顧客名・担当者・ステータス・チェック -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0" title="{{ project.customer.name }}">
+            <a href="{% url 'projects:projects_by_customer' project.customer.id %}" class="text-decoration-none text-dark">
+              {{ project.customer.name }}
+            </a>
+            {% if project.customer_person %}
+              （{{ project.customer_person }}）
+            {% endif %}
+          </h5>
           <div class="d-flex align-items-center gap-2">
             {% if project.status == 'open' %}
-            <span class="badge bg-success">募集中</span>
+              <span class="badge bg-success">募集中</span>
             {% else %}
-            <span class="badge bg-secondary">募集終了</span>
+              <span class="badge bg-secondary">募集終了</span>
             {% endif %}
             <div class="form-check">
               <input class="form-check-input project-checkbox" type="checkbox" name="selected_ids" value="{{ project.id }}" id="checkbox-{{ project.id }}">
@@ -44,24 +45,31 @@
           </div>
         </div>
 
+        <!-- プレビューと詳細 -->
         <div class="project-detail-preview" id="preview-{{ forloop.counter }}">
           {{ project.detail|linebreaksbr }}
         </div>
         <div class="collapse project-detail" id="detail-{{ forloop.counter }}">
           {{ project.detail|linebreaksbr }}
         </div>
-        <button
-          class="btn btn-link p-0 show-more"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#detail-{{ forloop.counter }}"
-          aria-expanded="false"
-          aria-controls="detail-{{ forloop.counter }}"
-          id="toggle-btn-{{ forloop.counter }}"
-          onclick="togglePreview({{ forloop.counter }})"
-        >
-          詳細を見る
-        </button>
+
+        <!-- 作成日時 ＋ 詳細ボタン -->
+        <div class="d-flex justify-content-between align-items-center mt-2">
+          <p class="text-muted mb-0 small">{{ project.created_at|date:"Y/m/d H:i" }}</p>
+          <button
+            class="btn btn-link p-0 show-more"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#detail-{{ forloop.counter }}"
+            aria-expanded="false"
+            aria-controls="detail-{{ forloop.counter }}"
+            id="toggle-btn-{{ forloop.counter }}"
+            onclick="togglePreview({{ forloop.counter }})"
+          >
+            詳細を見る
+          </button>
+        </div>
+
       </div>
     </div>
     {% empty %}

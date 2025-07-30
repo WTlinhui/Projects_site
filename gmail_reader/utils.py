@@ -121,6 +121,7 @@ def clean_body(body):
 DOMAIN_TO_CUSTOMER = {
     'wisdom-technology.co.jp': 'WT',
     'nsd.co.jp': 'NSD',
+    'dts.co.jp': 'DTS',
 }
 
 def process_emails(service, user):
