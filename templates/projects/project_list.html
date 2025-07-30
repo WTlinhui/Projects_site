@@ -21,89 +21,100 @@
   <div class="row">
     {% for project in projects %}
     <div class="col-md-4 mb-4">
-      <div class="card h-100 p-3">
-
-        <!-- 顧客名・担当者・ステータス・チェック -->
+      <div class="card h-100 p-3" id="project-card-{{ project.id }}">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0" title="{{ project.customer.name }}">
+          <h5 class="mb-0">
             <a href="{% url 'projects:projects_by_customer' project.customer.id %}" class="text-decoration-none text-dark">
               {{ project.customer.name }}
             </a>
-            {% if project.customer_person %}
-              （{{ project.customer_person }}）
-            {% endif %}
+            {% if project.customer_person %}（{{ project.customer_person }}）{% endif %}
           </h5>
           <div class="d-flex align-items-center gap-2">
-            {% if project.status == 'open' %}
-              <span class="badge bg-success">募集中</span>
-            {% else %}
-              <span class="badge bg-secondary">募集終了</span>
-            {% endif %}
+            <span class="badge {% if project.status == 'open' %}bg-success{% else %}bg-secondary{% endif %}" id="status-{{ project.id }}">
+              {% if project.status == 'open' %}募集中{% else %}募集終了{% endif %}
+            </span>
             <div class="form-check">
-              <input class="form-check-input project-checkbox" type="checkbox" name="selected_ids" value="{{ project.id }}" id="checkbox-{{ project.id }}">
+              <input class="form-check-input project-checkbox" type="checkbox" name="selected_ids" value="{{ project.id }}">
             </div>
           </div>
         </div>
 
-        <!-- プレビューと詳細 -->
-        <div class="project-detail-preview" id="preview-{{ forloop.counter }}">
+        <div class="project-detail-preview" id="preview-{{ project.id }}">
           {{ project.detail|linebreaksbr }}
         </div>
-        <div class="collapse project-detail" id="detail-{{ forloop.counter }}">
+        <div class="collapse project-detail" id="detail-{{ project.id }}">
           {{ project.detail|linebreaksbr }}
         </div>
 
-        <!-- 作成日時 ＋ 詳細ボタン -->
         <div class="d-flex justify-content-between align-items-center mt-2">
           <p class="text-muted mb-0 small">{{ project.created_at|date:"Y/m/d H:i" }}</p>
-          <button
-            class="btn btn-link p-0 show-more"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#detail-{{ forloop.counter }}"
-            aria-expanded="false"
-            aria-controls="detail-{{ forloop.counter }}"
-            id="toggle-btn-{{ forloop.counter }}"
-            onclick="togglePreview({{ forloop.counter }})"
-          >
-            詳細を見る
-          </button>
+          <div class="d-flex align-items-center gap-3">
+            <button type="button" class="btn btn-link p-0 show-more"
+              data-bs-toggle="collapse"
+              data-bs-target="#detail-{{ project.id }}"
+              onclick="togglePreview('{{ project.id }}')"
+              id="toggle-btn-{{ project.id }}">
+              詳細を見る
+            </button>
+            <div class="btn-group btn-group-sm" role="group">
+              <button type="button" class="btn btn-outline-secondary"
+                data-bs-toggle="modal"
+                data-bs-target="#editModal-{{ project.id }}">
+                編集
+              </button>
+              <button type="button" class="btn btn-outline-danger"
+                onclick="confirmDelete('{{ project.id }}')">
+                削除
+              </button>
+            </div>
+          </div>
         </div>
-
       </div>
     </div>
-    {% empty %}
-    <p class="text-center">案件がありません</p>
     {% endfor %}
   </div>
 </form>
+
+{% for project in projects %}
+<div class="modal fade" id="editModal-{{ project.id }}" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form class="edit-form" data-id="{{ project.id }}">
+        <div class="modal-header"><h5 class="modal-title">案件編集</h5></div>
+        <div class="modal-body">
+          <textarea name="detail" class="form-control" rows="8" style="height:260px; resize: vertical;">{{ project.detail }}</textarea>
+
+          <label for="status" class="form-label mt-3">ステータス</label>
+          <select name="status" class="form-select">
+            <option value="open" {% if project.status == 'open' %}selected{% endif %}>募集中</option>
+            <option value="closed" {% if project.status == 'closed' %}selected{% endif %}>募集終了</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+          <button type="submit" class="btn btn-success">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">削除確認</h5></div>
+      <div class="modal-body">本当にこの案件を削除しますか？</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">削除する</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-  // 全選択チェックボックスの動作
-  document.getElementById('select-all').addEventListener('change', function () {
-    const checkboxes = document.querySelectorAll('.project-checkbox');
-    checkboxes.forEach(cb => cb.checked = this.checked);
-  });
-
-  // 詳細トグル処理
-  function togglePreview(index) {
-    const preview = document.getElementById(`preview-${index}`);
-    const collapse = document.getElementById(`detail-${index}`);
-    const button = document.getElementById(`toggle-btn-${index}`);
-
-    if (!collapse.dataset.listenerAdded) {
-      collapse.addEventListener('shown.bs.collapse', function () {
-        button.textContent = '詳細を閉じる';
-        preview.style.display = 'none';
-      });
-      collapse.addEventListener('hidden.bs.collapse', function () {
-        button.textContent = '詳細を見る';
-        preview.style.display = '';
-      });
-      collapse.dataset.listenerAdded = true;
-    }
-  }
-</script>
+{% load static %}
+<script src="{% static 'projects/js/main.js' %}"></script>
 {% endblock %}
