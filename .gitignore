@@ -10,7 +10,6 @@ ENV/
 env/
 .venv/
 
-# 環境変数ファイル
 .env
 .env.local
 .env.*.local
@@ -22,13 +21,15 @@ env/
 db.sqlite3
 media/
 
-# IDEやエディタ関連（例：VSCode）
+
 .vscode/
 .idea/
 
 .env.production
 credentials.json
 token.json
-token.json
+ses_site/settings.py
+mail_log.txt
 db.sqlite3
 backups/
+

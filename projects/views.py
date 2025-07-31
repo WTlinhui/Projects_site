@@ -11,6 +11,8 @@ from openpyxl.worksheet.dimensions import DimensionHolder, ColumnDimension
 from io import BytesIO
 from openai import OpenAI
 import json
+from django.http import JsonResponse
+
 
 client = OpenAI()
 
@@ -164,3 +166,46 @@ def export_selected_projects_with_gpt(request):
         return response
 
     return HttpResponse("POSTリクエストで送信してください", status=405)
+
+@csrf_exempt
+def update_project(request, id):
+    if request.method == "POST":
+        try:
+            project = Project.objects.get(id=id)
+        except Project.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Project not found'}, status=404)
+
+        # ▼ 編集内容の取得
+        detail = request.POST.get('detail', '')
+        status = request.POST.get('status')  # ← ステータスも取得
+
+        # ▼ 更新処理
+        project.detail = detail
+        if status in ['open', 'closed']:
+            project.status = status  # ← ステータス更新も追加！
+        project.save()
+
+        # ▼ レスポンスに status も含める
+        return JsonResponse({
+            'success': True,
+            'updated_detail': detail,
+            'updated_status': project.status
+        })
+
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+
+
+@csrf_exempt
+def delete_project(request, id):
+    if request.method == "POST":
+        try:
+            project = Project.objects.get(id=id)
+        except Project.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Project not found'}, status=404)
+
+        project.delete()
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+

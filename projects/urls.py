@@ -7,4 +7,6 @@ urlpatterns = [
     path('', views.project_list, name='project_list'),
     path('export_selected_gpt/', views.export_selected_projects_with_gpt, name='export_selected_projects_with_gpt'),
     path('customer/<int:customer_id>/projects/', views.projects_by_customer, name='projects_by_customer'),
+    path('update/<int:id>/', views.update_project, name='update_project'),
+    path('delete/<int:id>/', views.delete_project, name='delete_project'),
 ]
